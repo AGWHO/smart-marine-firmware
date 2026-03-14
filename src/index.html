@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>SeaSafe</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="logo">Smart <span>Marine</span><br />Monitoring</div>
+
+        <nav class="nav">
+          <a href="#">Dashboard</a>
+        </nav>
+
+        <div class="sidebar-box">
+          <strong>Project Goal:</strong><br />
+          Monitor boat location, improve safety, and support real-time marine
+          tracking.
+        </div>
+
+        <div class="sidebar-box">
+          <strong>Prototype Version:</strong><br />
+          v1.0 - GPS Monitoring UI
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <h1>Marine GPS Tracking Dashboard</h1>
+          <div class="status-badge">System Online</div>
+        </div>
+
+        <section class="cards">
+          <div class="card">
+            <h3>Active Boats</h3>
+            <p>01</p>
+          </div>
+
+          <div class="card">
+            <h3>Connected Devices</h3>
+            <p>02</p>
+          </div>
+
+          <div class="card">
+            <h3>Alerts Today</h3>
+            <p id="alerts-today">00</p>
+          </div>
+
+          <div class="card">
+            <h3>Weather Condition</h3>
+            <p>Fair</p>
+          </div>
+        </section>
+
+        <section class="dashboard-grid">
+          <div class="panel">
+            <h2>Live GPS Map</h2>
+
+            <div id="map"></div>
+
+            <div class="legend">
+              <span><i class="dot safe"></i> Safe Zone</span>
+              <span><i class="dot warning"></i> Warning Area</span>
+              <span><i class="dot danger"></i> Critical Alert</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Device Status</h2>
+
+            <div class="tracker-list">
+              <div class="tracker-item">
+                <h3>Shore Station - Lawis Point</h3>
+                <p><strong>Status:</strong> Monitoring</p>
+                <p><strong>Latitude:</strong> 9.8827</p>
+                <p><strong>Longitude:</strong> 123.6076</p>
+                <p><strong>Device:</strong> Orange Pi Shore Unit</p>
+              </div>
+
+              <div class="tracker-item">
+                <h3>Fishing Boat</h3>
+                <p>
+                  <strong>Status:</strong> <span id="boat-status">Active</span>
+                </p>
+                <p>
+                  <strong>Latitude:</strong> <span id="boat-lat">9.905000</span>
+                </p>
+                <p>
+                  <strong>Longitude:</strong>
+                  <span id="boat-lng">123.640000</span>
+                </p>
+                <p><strong>Device:</strong> Orange Pi Boat Unit</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
