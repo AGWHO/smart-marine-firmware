@@ -1,7 +1,7 @@
 // Lawis Point - Shore Monitoring Station
 const shoreCoords = [9.874979892536736, 123.60819114958444];
 
-// Simulated boat path (sample GPS points at sea)
+// Simulated boat path (used for now while GPS is unavailable)
 const boatPath = [
   [9.905, 123.64],
   [9.9, 123.635],
@@ -82,7 +82,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Optional: update UI text if matching elements exist
+// Update boat location info
 function updateBoatInfo(coords, distanceKm) {
   const [lat, lng] = coords;
 
@@ -104,7 +104,57 @@ function updateBoatInfo(coords, distanceKm) {
   }
 }
 
-// Animate boat movement
+// Update sensor status from status.json
+async function loadStatus() {
+  try {
+    const response = await fetch("status.json?t=" + Date.now());
+    const data = await response.json();
+
+    const rainStatus = document.getElementById("rain-status");
+    const obstacleStatus = document.getElementById("obstacle-status");
+    const distanceStatus = document.getElementById("distance-status");
+    const gpsStatus = document.getElementById("gps-status");
+    const weatherCondition = document.getElementById("weather-condition");
+    const systemStatus = document.getElementById("system-status");
+
+    if (rainStatus) {
+      rainStatus.textContent = data.rain || "UNKNOWN";
+    }
+
+    if (obstacleStatus) {
+      obstacleStatus.textContent = data.obstacle || "UNKNOWN";
+    }
+
+    if (distanceStatus) {
+      distanceStatus.textContent =
+        data.distance_cm !== null && data.distance_cm !== undefined
+          ? `${data.distance_cm} cm`
+          : "No reading";
+    }
+
+    if (gpsStatus) {
+      gpsStatus.textContent = data.gps || "UNAVAILABLE";
+    }
+
+    if (weatherCondition) {
+      weatherCondition.textContent =
+        data.rain === "DETECTED" ? "Rain Detected" : "Fair";
+    }
+
+    if (systemStatus) {
+      systemStatus.textContent = "System Online";
+    }
+  } catch (error) {
+    console.error("Failed to load status.json:", error);
+
+    const systemStatus = document.getElementById("system-status");
+    if (systemStatus) {
+      systemStatus.textContent = "System Offline";
+    }
+  }
+}
+
+// Animate boat movement for now
 let currentIndex = 0;
 
 function moveBoat() {
@@ -132,5 +182,10 @@ function moveBoat() {
   updateBoatInfo(newCoords, distanceKm);
 }
 
-// Run every 2 seconds
+// Initial load
+moveBoat();
+loadStatus();
+
+// Refresh every 2 seconds
 setInterval(moveBoat, 2000);
+setInterval(loadStatus, 2000);

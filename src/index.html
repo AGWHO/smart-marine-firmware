@@ -38,7 +38,7 @@
       <main class="main">
         <div class="topbar">
           <h1>Marine GPS Tracking Dashboard</h1>
-          <div class="status-badge">System Online</div>
+          <div class="status-badge" id="system-status">System Online</div>
         </div>
 
         <section class="cards">
@@ -59,7 +59,7 @@
 
           <div class="card">
             <h3>Weather Condition</h3>
-            <p>Fair</p>
+            <p id="weather-condition">Fair</p>
           </div>
         </section>
 
@@ -101,6 +101,10 @@
                   <span id="boat-lng">123.640000</span>
                 </p>
                 <p><strong>Device:</strong> Orange Pi Boat Unit</p>
+                <p><strong>Rain:</strong> <span id="rain-status">Loading...</span></p>
+                <p><strong>Obstacle:</strong> <span id="obstacle-status">Loading...</span></p>
+                <p><strong>Distance:</strong> <span id="distance-status">Loading...</span></p>
+                <p><strong>GPS:</strong> <span id="gps-status">Unavailable</span></p>
               </div>
             </div>
           </div>
