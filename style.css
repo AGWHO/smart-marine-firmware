@@ -1,0 +1,181 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #eef4f8;
+  color: #1f2d3d;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: #0d3b66;
+  color: white;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.logo span {
+  color: #7fd3ff;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.sidebar-box {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.main {
+  padding: 24px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.topbar h1 {
+  font-size: 28px;
+  color: #0d3b66;
+}
+
+.status-badge {
+  background: #d7f7e8;
+  color: #147a49;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.card {
+  background: white;
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.card h3 {
+  font-size: 14px;
+  color: #5a6a7a;
+}
+
+.card p {
+  font-size: 26px;
+  font-weight: bold;
+  color: #0d3b66;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+
+.panel {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  padding: 18px;
+}
+
+.panel h2 {
+  font-size: 20px;
+  margin-bottom: 14px;
+  color: #0d3b66;
+}
+
+#map {
+  width: 100%;
+  height: 460px;
+  border-radius: 14px;
+}
+
+.tracker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tracker-item {
+  border: 1px solid #dbe7f0;
+  border-radius: 14px;
+  padding: 14px;
+  background: #f9fcff;
+}
+
+.tracker-item h3 {
+  font-size: 16px;
+  color: #12385f;
+}
+
+.tracker-item p {
+  font-size: 14px;
+  color: #556677;
+}
+
+.legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.safe {
+  background: #2ecc71;
+}
+.warning {
+  background: #f39c12;
+}
+.danger {
+  background: #e74c3c;
+}
