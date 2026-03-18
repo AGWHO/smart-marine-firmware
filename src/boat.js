@@ -1,9 +1,13 @@
+// ===== GO BACK TO DASHBOARD =====
 function goBackToDashboard() {
   window.location.href = "index.html";
 }
 
+// ===== SHORE LOCATION =====
 const shoreCoords = [9.874979892536736, 123.60819114958444];
 
+// ===== SIMULATED BOAT PATH =====
+// Used for now while real GPS is unavailable
 const boatPath = [
   [9.905, 123.64],
   [9.9, 123.635],
@@ -18,47 +22,48 @@ const boatPath = [
   [9.9, 123.639],
 ];
 
-// MAP
-const boatMap = L.map("boat-map").setView(boatPath[0], 13);
+// ===== CREATE FIXED MAP =====
+// Fixed view only, no auto-fit and no auto-zoom
+const boatMap = L.map("boat-map").setView([9.89, 123.62], 13);
 
+// ===== LOAD MAP TILES =====
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(boatMap);
 
-// Shore marker
+// ===== SHORE MARKER ICON =====
 const redIcon = new L.Icon({
   iconUrl:
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
+// ===== SHORE MARKER =====
 L.marker(shoreCoords, { icon: redIcon })
   .addTo(boatMap)
   .bindPopup("<b>Shore Monitoring Station</b><br>Lawis Point");
 
-// Boat marker
+// ===== BOAT MARKER =====
 const boatMarker = L.marker(boatPath[0])
   .addTo(boatMap)
   .bindPopup("<b>Fishing Boat</b><br>Orange Pi Boat Unit");
 
-// Line
-const routeLine = L.polyline([shoreCoords, boatPath[0]], {
-  color: "blue",
-  weight: 3,
-}).addTo(boatMap);
-
-// Safe zone
+// ===== SAFE ZONE =====
 L.circle(shoreCoords, {
   color: "#2ecc71",
   fillColor: "#2ecc71",
   fillOpacity: 0.15,
   radius: 5000,
-}).addTo(boatMap);
+})
+  .addTo(boatMap)
+  .bindPopup("LoRa Communication Range (5km)");
 
-// Distance calculator
+// ===== DISTANCE CALCULATOR =====
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -75,13 +80,17 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Store latest sensor data
+// ===== STORE LATEST SENSOR DATA =====
+// These match the fields written by main.py
 let latestData = {
+  rain: "UNKNOWN",
   obstacle: "UNKNOWN",
   distance_cm: null,
+  wind_kmh: 0,
+  gps: "UNAVAILABLE",
 };
 
-// Load sensor data
+// ===== LOAD SENSOR DATA FROM status.json =====
 async function loadBoatStatus() {
   try {
     const response = await fetch("status.json?t=" + Date.now());
@@ -92,7 +101,7 @@ async function loadBoatStatus() {
   }
 }
 
-// Update UI
+// ===== UPDATE BOAT DETAIL CARDS =====
 function updateCards(distanceKm) {
   const wind = document.getElementById("detail-wind-status");
   const obstacle = document.getElementById("detail-obstacle-status");
@@ -101,15 +110,20 @@ function updateCards(distanceKm) {
   const distanceToShore = document.getElementById("distance-to-shore");
   const tilt = document.getElementById("detail-tilt-status");
 
-  // Wind (placeholder)
-  if (wind) wind.textContent = "No Data";
+  // ===== WIND SENSOR =====
+  if (wind) {
+    wind.textContent =
+      latestData.wind_kmh !== null && latestData.wind_kmh !== undefined
+        ? `${latestData.wind_kmh} km/h`
+        : "No Data";
+  }
 
-  // Obstacle
+  // ===== OBSTACLE SENSOR =====
   if (obstacle) {
     obstacle.textContent = latestData.obstacle || "UNKNOWN";
   }
 
-  // Distance (sensor)
+  // ===== DISTANCE SENSOR =====
   if (distance) {
     distance.textContent =
       latestData.distance_cm !== null && latestData.distance_cm !== undefined
@@ -117,24 +131,28 @@ function updateCards(distanceKm) {
         : "No reading";
   }
 
-  // Distance to shore
+  // ===== DISTANCE TO SHORE =====
   if (distanceToShore) {
     distanceToShore.textContent = `${distanceKm.toFixed(2)} km`;
   }
 
-  // Tilt (placeholder)
-  if (tilt) tilt.textContent = "No Data";
+  // ===== TILT SENSOR =====
+  // Still placeholder because your main.py does not provide tilt yet
+  if (tilt) {
+    tilt.textContent = "No Data";
+  }
 
-  // Boat status
+  // ===== BOAT STATUS =====
   if (boatStatus) {
-    boatStatus.textContent =
-      latestData.obstacle === "DETECTED"
-        ? "Warning - Obstacle"
-        : "Active - Safe";
+    if (latestData.obstacle === "DETECTED") {
+      boatStatus.textContent = "Warning - Obstacle";
+    } else {
+      boatStatus.textContent = "Active - Safe";
+    }
   }
 }
 
-// Movement
+// ===== MOVE ONLY THE BOAT MARKER =====
 let currentIndex = 0;
 
 function moveBoat() {
@@ -142,7 +160,6 @@ function moveBoat() {
   const coords = boatPath[currentIndex];
 
   boatMarker.setLatLng(coords);
-  routeLine.setLatLngs([shoreCoords, coords]);
 
   const distanceKm = calculateDistance(
     shoreCoords[0],
@@ -151,28 +168,25 @@ function moveBoat() {
     coords[1],
   );
 
-  // Auto-fit map to both points
-  const bounds = L.latLngBounds([shoreCoords, coords]);
-  boatMap.fitBounds(bounds, { padding: [40, 40] });
-
   boatMarker.bindPopup(`
     <b>Fishing Boat</b><br>
     Latitude: ${coords[0].toFixed(6)}<br>
     Longitude: ${coords[1].toFixed(6)}<br>
-    Distance: ${distanceKm.toFixed(2)} km
+    Distance from Shore: ${distanceKm.toFixed(2)} km
   `);
 
   updateCards(distanceKm);
 }
 
-// Fix resize bug
+// ===== FIX MAP RESIZE =====
 window.addEventListener("resize", () => {
   boatMap.invalidateSize();
 });
 
-// INIT
+// ===== INITIAL LOAD =====
 loadBoatStatus();
 moveBoat();
 
+// ===== AUTO REFRESH =====
 setInterval(loadBoatStatus, 2000);
 setInterval(moveBoat, 2000);
