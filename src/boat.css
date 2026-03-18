@@ -1,0 +1,49 @@
+/* Back button (Boat page) */
+.back-button {
+  background: #0d3b66;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.back-button:hover {
+  background: #145a9c;
+}
+
+/* Make boat page layout single column */
+.single-panel {
+  grid-template-columns: 1fr !important;
+}
+
+/* Improve spacing inside boat details */
+.single-panel .tracker-item {
+  margin-bottom: 12px;
+}
+
+/* Highlight sensor values */
+#detail-rain-status,
+#detail-obstacle-status,
+#detail-distance-status,
+#detail-gps-status,
+#sensor-rain-status,
+#sensor-obstacle-status,
+#sensor-distance-status,
+#sensor-gps-status {
+  font-weight: bold;
+  color: #0d3b66;
+}
+
+/* Optional: status colors */
+.status-safe {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.status-warning {
+  color: #e74c3c;
+  font-weight: bold;
+}

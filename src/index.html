@@ -1,13 +1,16 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- ===== BASIC PAGE SETUP ===== -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>SeaSafe</title>
 
+    <!-- ===== MAIN CSS FILE ===== -->
     <link rel="stylesheet" href="style.css" />
 
+    <!-- ===== LEAFLET MAP CSS ===== -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -16,11 +19,12 @@
 
   <body>
     <div class="container">
+      <!-- ===== SIDEBAR START ===== -->
       <aside class="sidebar">
         <div class="logo">Smart <span>Marine</span><br />Monitoring</div>
 
         <nav class="nav">
-          <a href="#">Dashboard</a>
+          <a href="index.html" class="active">Dashboard</a>
         </nav>
 
         <div class="sidebar-box">
@@ -35,12 +39,14 @@
         </div>
       </aside>
 
+      <!-- ===== MAIN CONTENT START ===== -->
       <main class="main">
         <div class="topbar">
           <h1>Marine GPS Tracking Dashboard</h1>
           <div class="status-badge" id="system-status">System Online</div>
         </div>
 
+        <!-- ===== TOP SUMMARY CARDS ===== -->
         <section class="cards">
           <div class="card">
             <h3>Active Boats</h3>
@@ -63,7 +69,9 @@
           </div>
         </section>
 
+        <!-- ===== MAIN DASHBOARD GRID ===== -->
         <section class="dashboard-grid">
+          <!-- ===== MAP PANEL ===== -->
           <div class="panel">
             <h2>Live GPS Map</h2>
 
@@ -76,10 +84,12 @@
             </div>
           </div>
 
+          <!-- ===== DEVICE STATUS PANEL ===== -->
           <div class="panel">
             <h2>Device Status</h2>
 
             <div class="tracker-list">
+              <!-- ===== SHORE CARD ===== -->
               <div class="tracker-item">
                 <h3>Shore Station - Lawis Point</h3>
                 <p><strong>Status:</strong> Monitoring</p>
@@ -88,23 +98,28 @@
                 <p><strong>Device:</strong> Orange Pi Shore Unit</p>
               </div>
 
-              <div class="tracker-item">
+              <!-- ===== BOAT CARD ===== -->
+              <div class="tracker-item clickable-card" onclick="goToBoatPage()">
                 <h3>Fishing Boat</h3>
+
                 <p>
-                  <strong>Status:</strong> <span id="boat-status">Active</span>
+                  <strong>Status:</strong>
+                  <span id="boat-status">Active</span>
                 </p>
+
                 <p>
-                  <strong>Latitude:</strong> <span id="boat-lat">9.905000</span>
+                  <strong>Latitude:</strong>
+                  <span id="boat-lat">9.905000</span>
                 </p>
+
                 <p>
                   <strong>Longitude:</strong>
                   <span id="boat-lng">123.640000</span>
                 </p>
+
                 <p><strong>Device:</strong> Orange Pi Boat Unit</p>
-                <p><strong>Rain:</strong> <span id="rain-status">Loading...</span></p>
-                <p><strong>Obstacle:</strong> <span id="obstacle-status">Loading...</span></p>
-                <p><strong>Distance:</strong> <span id="distance-status">Loading...</span></p>
-                <p><strong>GPS:</strong> <span id="gps-status">Unavailable</span></p>
+
+                <p class="view-details">Tap to view boat details →</p>
               </div>
             </div>
           </div>
@@ -112,7 +127,10 @@
       </main>
     </div>
 
+    <!-- ===== LEAFLET MAP JS ===== -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ===== MAIN SCRIPT ===== -->
     <script src="script.js"></script>
   </body>
 </html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- ===== BASIC PAGE SETUP ===== -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SeaSafe - Boat Details</title>
+
+    <!-- ===== MAIN CSS FILE ===== -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- ===== LEAFLET MAP CSS ===== -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- ===== SIDEBAR START ===== -->
+      <aside class="sidebar">
+        <!-- LOGO / SYSTEM TITLE -->
+        <div class="logo">Smart <span>Marine</span><br />Monitoring</div>
+
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="nav">
+          <a href="index.html">Dashboard</a>
+          <a href="boat.html" class="active">Fishing Boat</a>
+        </nav>
+
+        <!-- PROJECT GOAL BOX -->
+        <div class="sidebar-box">
+          <strong>Project Goal:</strong><br />
+          Monitor boat location, improve safety, and support real-time marine
+          tracking.
+        </div>
+
+        <!-- PROTOTYPE VERSION BOX -->
+        <div class="sidebar-box">
+          <strong>Prototype Version:</strong><br />
+          v1.0 - GPS Monitoring UI
+        </div>
+      </aside>
+      <!-- ===== SIDEBAR END ===== -->
+
+      <!-- ===== MAIN CONTENT START ===== -->
+      <main class="main">
+        <!-- TOP HEADER BAR -->
+        <div class="topbar">
+          <h1>Fishing Boat Details</h1>
+
+          <!-- BACK BUTTON -->
+          <button class="back-button" onclick="goBackToDashboard()">
+            Back to Dashboard
+          </button>
+        </div>
+
+        <!-- ===== TOP STATUS CARDS START ===== -->
+        <section class="cards">
+          <!-- BOAT STATUS CARD -->
+          <div class="card">
+            <h3>Boat Status</h3>
+            <p id="detail-boat-status">Active</p>
+          </div>
+
+          <!-- WIND SENSOR CARD -->
+          <div class="card">
+            <h3>Wind Sensor</h3>
+            <p id="detail-wind-status">No Data</p>
+          </div>
+
+          <!-- OBSTACLE SENSOR CARD -->
+          <div class="card">
+            <h3>Obstacle Sensor</h3>
+            <p id="detail-obstacle-status">Loading...</p>
+          </div>
+
+          <!-- DISTANCE SENSOR CARD -->
+          <div class="card">
+            <h3>Distance</h3>
+            <p id="detail-distance-status">Loading...</p>
+          </div>
+        </section>
+        <!-- ===== TOP STATUS CARDS END ===== -->
+
+        <!-- ===== MAIN MAP SECTION START ===== -->
+        <section class="dashboard-grid single-panel">
+          <div class="panel">
+            <h2>Boat GPS Location</h2>
+
+            <!-- BOAT MAP CONTAINER -->
+            <div id="boat-map"></div>
+          </div>
+        </section>
+        <!-- ===== MAIN MAP SECTION END ===== -->
+
+        <!-- ===== BOTTOM STATUS CARDS START ===== -->
+        <section class="cards bottom-cards">
+          <!-- DISTANCE TO SHORE CARD -->
+          <div class="card">
+            <h3>Distance to Shore</h3>
+            <p id="distance-to-shore">Loading...</p>
+          </div>
+
+          <!-- TILT SENSOR CARD -->
+          <div class="card">
+            <h3>Tilt Sensor</h3>
+            <p id="detail-tilt-status">No Data</p>
+          </div>
+        </section>
+        <!-- ===== BOTTOM STATUS CARDS END ===== -->
+      </main>
+      <!-- ===== MAIN CONTENT END ===== -->
+    </div>
+
+    <!-- ===== LEAFLET MAP JS ===== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ===== BOAT PAGE SCRIPT ===== -->
+    <script src="boat.js"></script>
+  </body>
+</html>

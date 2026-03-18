@@ -1,7 +1,8 @@
-// Lawis Point - Shore Monitoring Station
+// ===== SHORE LOCATION =====
 const shoreCoords = [9.874979892536736, 123.60819114958444];
 
-// Simulated boat path (used for now while GPS is unavailable)
+// ===== SIMULATED BOAT PATH =====
+// Used for now while GPS is unavailable
 const boatPath = [
   [9.905, 123.64],
   [9.9, 123.635],
@@ -16,16 +17,17 @@ const boatPath = [
   [9.9, 123.639],
 ];
 
-// Create map
-const map = L.map("map").setView(shoreCoords, 12);
+// ===== CREATE MAP =====
+// Fixed view only, no auto zooming in and out
+const map = L.map("map").setView([9.89, 123.62], 13);
 
-// Load map tiles
+// ===== LOAD MAP TILES =====
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
 
-// Red icon for shore
+// ===== SHORE ICON =====
 const redIcon = new L.Icon({
   iconUrl:
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
@@ -36,24 +38,18 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-// Shore marker
-const shoreMarker = L.marker(shoreCoords, { icon: redIcon })
+// ===== SHORE MARKER =====
+L.marker(shoreCoords, { icon: redIcon })
   .addTo(map)
   .bindPopup("<b>Shore Monitoring Station</b><br>Lawis Point - Orange Pi");
 
-// Boat marker
+// ===== BOAT MARKER =====
 const boatMarker = L.marker(boatPath[0])
   .addTo(map)
   .bindPopup("<b>Fishing Boat</b><br>Orange Pi Boat Unit");
 
-// Route line
-const routeLine = L.polyline([shoreCoords, boatPath[0]], {
-  color: "blue",
-  weight: 3,
-}).addTo(map);
-
-// Safe zone circle (5 km)
-const safeZone = L.circle(shoreCoords, {
+// ===== SAFE ZONE CIRCLE =====
+L.circle(shoreCoords, {
   color: "#2ecc71",
   fillColor: "#2ecc71",
   fillOpacity: 0.15,
@@ -62,10 +58,7 @@ const safeZone = L.circle(shoreCoords, {
   .addTo(map)
   .bindPopup("LoRa Communication Range (5km)");
 
-// Fit map to show both markers at start
-map.fitBounds(routeLine.getBounds());
-
-// Helper: calculate distance in km
+// ===== DISTANCE CALCULATOR =====
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -82,7 +75,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Update boat location info
+// ===== UPDATE BOAT INFO ON DASHBOARD =====
 function updateBoatInfo(coords, distanceKm) {
   const [lat, lng] = coords;
 
@@ -104,37 +97,14 @@ function updateBoatInfo(coords, distanceKm) {
   }
 }
 
-// Update sensor status from status.json
+// ===== LOAD STATUS FROM status.json =====
 async function loadStatus() {
   try {
     const response = await fetch("status.json?t=" + Date.now());
     const data = await response.json();
 
-    const rainStatus = document.getElementById("rain-status");
-    const obstacleStatus = document.getElementById("obstacle-status");
-    const distanceStatus = document.getElementById("distance-status");
-    const gpsStatus = document.getElementById("gps-status");
     const weatherCondition = document.getElementById("weather-condition");
     const systemStatus = document.getElementById("system-status");
-
-    if (rainStatus) {
-      rainStatus.textContent = data.rain || "UNKNOWN";
-    }
-
-    if (obstacleStatus) {
-      obstacleStatus.textContent = data.obstacle || "UNKNOWN";
-    }
-
-    if (distanceStatus) {
-      distanceStatus.textContent =
-        data.distance_cm !== null && data.distance_cm !== undefined
-          ? `${data.distance_cm} cm`
-          : "No reading";
-    }
-
-    if (gpsStatus) {
-      gpsStatus.textContent = data.gps || "UNAVAILABLE";
-    }
 
     if (weatherCondition) {
       weatherCondition.textContent =
@@ -154,7 +124,12 @@ async function loadStatus() {
   }
 }
 
-// Animate boat movement for now
+// ===== OPEN BOAT DETAILS PAGE =====
+function goToBoatPage() {
+  window.location.href = "boat.html";
+}
+
+// ===== MOVE ONLY THE BOAT MARKER =====
 let currentIndex = 0;
 
 function moveBoat() {
@@ -162,7 +137,6 @@ function moveBoat() {
   const newCoords = boatPath[currentIndex];
 
   boatMarker.setLatLng(newCoords);
-  routeLine.setLatLngs([shoreCoords, newCoords]);
 
   const distanceKm = calculateDistance(
     shoreCoords[0],
@@ -182,10 +156,15 @@ function moveBoat() {
   updateBoatInfo(newCoords, distanceKm);
 }
 
-// Initial load
+// ===== RESIZE MAP ONLY =====
+window.addEventListener("resize", () => {
+  map.invalidateSize();
+});
+
+// ===== INITIAL LOAD =====
 moveBoat();
 loadStatus();
 
-// Refresh every 2 seconds
+// ===== AUTO REFRESH =====
 setInterval(moveBoat, 2000);
 setInterval(loadStatus, 2000);
