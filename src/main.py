@@ -5,13 +5,29 @@ import json
 TRIG = "PC7"
 ECHO = "PC8"
 RAIN = "PC6"
+WIND = "PC10"  # NEW
 
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.SUNXI)
 
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 GPIO.setup(RAIN, GPIO.IN)
+GPIO.setup(WIND, GPIO.IN)
 
+# ===== WIND VARIABLES =====
+wind_pulse_count = 0
+wind_speed_ms = 0.0
+wind_speed_kmh = 0.0
+last_wind_time = time.time()
+WIND_FACTOR = 0.667
+
+def count_wind_pulse(channel):
+    global wind_pulse_count
+    wind_pulse_count += 1
+
+GPIO.add_event_detect(WIND, GPIO.FALLING, callback=count_wind_pulse, bouncetime=2)
+ 
 print("Smart Marine Prototype Firmware - Version 1.0")
 
 def measure_distance():
@@ -49,6 +65,7 @@ def get_rain_status():
 
 try:
     while True:
+        # ===== EXISTING SENSORS =====
         distance = measure_distance()
         rain_status = get_rain_status()
 
@@ -62,10 +79,25 @@ try:
             obstacle_status = "CLEAR"
             distance_value = distance
 
+        # ===== WIND CALCULATION =====
+        current_time = time.time()
+        elapsed = current_time - last_wind_time
+
+        if elapsed >= 3.0:
+            frequency = wind_pulse_count / elapsed
+            wind_speed_ms = frequency * WIND_FACTOR
+            wind_speed_kmh = wind_speed_ms * 3.6
+
+            wind_pulse_count = 0
+            last_wind_time = current_time
+
+        # ===== DATA OUTPUT =====
         data = {
             "rain": rain_status,
             "obstacle": obstacle_status,
             "distance_cm": distance_value,
+            "wind_ms": round(wind_speed_ms, 2),
+            "wind_kmh": round(wind_speed_kmh, 2),
             "gps": "UNAVAILABLE"
         }
 
@@ -76,6 +108,7 @@ try:
         print(f"Rain: {rain_status}")
         print(f"Obstacle: {obstacle_status}")
         print(f"Distance: {distance_value} cm")
+        print(f"Wind: {wind_speed_kmh:.2f} km/h")  # NEW
         print("GPS: UNAVAILABLE")
 
         time.sleep(2)
