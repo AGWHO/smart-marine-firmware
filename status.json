@@ -1,6 +1,1 @@
-{
-  "rain": "NONE",
-  "obstacle": "CLEAR",
-  "distance_cm": 43.29,
-  "gps": "UNAVAILABLE"
-}
+{"rain": "DETECTED", "obstacle": "CLEAR", "distance_cm": 194.06, "wind_ms": 15.24, "wind_kmh": 54.88, "gps": "UNAVAILABLE"}

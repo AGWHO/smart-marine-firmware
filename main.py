@@ -5,15 +5,30 @@ import json
 TRIG = "PC7"
 ECHO = "PC8"
 RAIN = "PC6"
+WIND = "PC10"  # NEW
 
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.SUNXI)
 
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 GPIO.setup(RAIN, GPIO.IN)
+GPIO.setup(WIND, GPIO.IN)
+
+# ===== WIND VARIABLES =====
+wind_pulse_count = 0
+wind_speed_ms = 0.0
+wind_speed_kmh = 0.0
+last_wind_time = time.time()
+WIND_FACTOR = 0.667
+
+def count_wind_pulse(channel):
+    global wind_pulse_count
+    wind_pulse_count += 1
+
+GPIO.add_event_detect(WIND, GPIO.FALLING, callback=count_wind_pulse, bouncetime=2)
 
 print("Smart Marine Prototype Firmware - Version 1.0")
-
 
 def measure_distance():
     GPIO.output(TRIG, False)
@@ -45,25 +60,12 @@ def measure_distance():
     distance = duration * 17150
     return round(distance, 2)
 
-
 def get_rain_status():
     return "DETECTED" if GPIO.input(RAIN) == 0 else "NONE"
 
-
-def write_status_file(rain_status, obstacle_status, distance_value):
-    data = {
-        "rain": rain_status,
-        "obstacle": obstacle_status,
-        "distance_cm": distance_value,
-        "gps": "UNAVAILABLE"
-    }
-
-    with open("status.json", "w") as f:
-        json.dump(data, f, indent=2)
-
-
 try:
     while True:
+        # ===== EXISTING SENSORS =====
         distance = measure_distance()
         rain_status = get_rain_status()
 
@@ -77,26 +79,40 @@ try:
             obstacle_status = "CLEAR"
             distance_value = distance
 
-        write_status_file(rain_status, obstacle_status, distance_value)
+        # ===== WIND CALCULATION =====
+        current_time = time.time()
+        elapsed = current_time - last_wind_time
+
+        if elapsed >= 3.0:
+            frequency = wind_pulse_count / elapsed
+            wind_speed_ms = frequency * WIND_FACTOR
+            wind_speed_kmh = wind_speed_ms * 3.6
+
+            wind_pulse_count = 0
+            last_wind_time = current_time
+
+        # ===== DATA OUTPUT =====
+        data = {
+            "rain": rain_status,
+            "obstacle": obstacle_status,
+            "distance_cm": distance_value,
+            "wind_ms": round(wind_speed_ms, 2),
+            "wind_kmh": round(wind_speed_kmh, 2),
+            "gps": "UNAVAILABLE"
+        }
+
+        with open("status.json", "w") as f:
+            json.dump(data, f)
 
         print("\n--- BOAT STATUS ---")
         print(f"Rain: {rain_status}")
         print(f"Obstacle: {obstacle_status}")
-
-        if distance_value is None:
-            print("Distance: No reading")
-        else:
-            print(f"Distance: {distance_value} cm")
-
+        print(f"Distance: {distance_value} cm")
+        print(f"Wind: {wind_speed_kmh:.2f} km/h")  # NEW
         print("GPS: UNAVAILABLE")
 
         time.sleep(2)
 
 except KeyboardInterrupt:
     print("\nShutting down system...")
-
-except Exception as e:
-    print(f"\nError: {e}")
-
-finally:
     GPIO.cleanup()
