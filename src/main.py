@@ -1,11 +1,14 @@
 import OPi.GPIO as GPIO
 import time
 import json
+from smbus import SMBus
+import math
 
+# ===== PIN SETUP =====
 TRIG = "PC7"
 ECHO = "PC8"
 RAIN = "PC6"
-WIND = "PC10"  # NEW
+WIND = "PC10"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.SUNXI)
@@ -27,9 +30,45 @@ def count_wind_pulse(channel):
     wind_pulse_count += 1
 
 GPIO.add_event_detect(WIND, GPIO.FALLING, callback=count_wind_pulse, bouncetime=2)
- 
-print("Smart Marine Prototype Firmware - Version 1.0")
 
+# ===== TILT SENSOR (MPU6050) =====
+bus = SMBus(2)   # your working I2C bus
+MPU_ADDR = 0x68
+
+# Wake up MPU6050
+bus.write_byte_data(MPU_ADDR, 0x6B, 0)
+
+def read_word(reg):
+    high = bus.read_byte_data(MPU_ADDR, reg)
+    low = bus.read_byte_data(MPU_ADDR, reg + 1)
+    value = (high << 8) + low
+    if value > 32768:
+        value -= 65536
+    return value
+
+def get_tilt_angle():
+    x = read_word(0x3B)
+    y = read_word(0x3D)
+    z = read_word(0x3F)
+
+    x /= 16384.0
+    y /= 16384.0
+    z /= 16384.0
+
+    angle = math.degrees(math.atan2(x, math.sqrt(y*y + z*z)))
+    return angle
+
+def get_tilt_status(angle):
+    if abs(angle) < 15:
+        return "FLAT"
+    elif abs(angle) < 35:
+        return "SLIGHT TILT"
+    else:
+        return "DANGER TILT"
+
+print("Smart Marine Prototype Firmware - Version 2.0")
+
+# ===== ULTRASONIC FUNCTION =====
 def measure_distance():
     GPIO.output(TRIG, False)
     time.sleep(0.05)
@@ -60,9 +99,11 @@ def measure_distance():
     distance = duration * 17150
     return round(distance, 2)
 
+# ===== RAIN FUNCTION =====
 def get_rain_status():
     return "DETECTED" if GPIO.input(RAIN) == 0 else "NONE"
 
+# ===== MAIN LOOP =====
 try:
     while True:
         # ===== EXISTING SENSORS =====
@@ -91,6 +132,10 @@ try:
             wind_pulse_count = 0
             last_wind_time = current_time
 
+        # ===== TILT SENSOR =====
+        tilt_angle = get_tilt_angle()
+        tilt_status = get_tilt_status(tilt_angle)
+
         # ===== DATA OUTPUT =====
         data = {
             "rain": rain_status,
@@ -98,17 +143,21 @@ try:
             "distance_cm": distance_value,
             "wind_ms": round(wind_speed_ms, 2),
             "wind_kmh": round(wind_speed_kmh, 2),
+            "tilt_angle": round(tilt_angle, 2),
+            "tilt_status": tilt_status,
             "gps": "UNAVAILABLE"
         }
 
         with open("status.json", "w") as f:
             json.dump(data, f)
 
+        # ===== TERMINAL OUTPUT =====
         print("\n--- BOAT STATUS ---")
         print(f"Rain: {rain_status}")
         print(f"Obstacle: {obstacle_status}")
         print(f"Distance: {distance_value} cm")
-        print(f"Wind: {wind_speed_kmh:.2f} km/h")  # NEW
+        print(f"Wind: {wind_speed_kmh:.2f} km/h")
+        print(f"Tilt: {tilt_angle:.2f}° ({tilt_status})")
         print("GPS: UNAVAILABLE")
 
         time.sleep(2)
