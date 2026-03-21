@@ -307,3 +307,139 @@ body {
     height: 320px;
   }
 }
+
+/* ===== NEW PROFESSIONAL DASHBOARD LAYOUT ===== */
+
+/* Remove sidebar spacing effect */
+.container {
+  display: block !important;
+}
+
+/* Main container (new layout) */
+.main-container {
+  padding: 24px;
+  max-width: 1300px;
+  margin: auto;
+}
+
+/* Top bar upgrade */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.topbar h1 {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+/* Status badge upgrade */
+.status-badge {
+  background: #e8f8f0;
+  color: #1abc9c;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+/* ===== MODERN CARD GRID ===== */
+.cards-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Card upgrade */
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+/* Hover animation */
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* Card title */
+.card h3 {
+  font-size: 13px;
+  color: #7a8a9a;
+}
+
+/* Card value */
+.card p {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ===== MAP SECTION ===== */
+.map-container {
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+#map,
+#boat-map {
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+}
+
+/* ===== ALERT BANNER ===== */
+.alert-banner {
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+  background: #e74c3c;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Prevent overlap with banner */
+body {
+  padding-top: 50px;
+}
+
+/* ===== STATUS COLORS ===== */
+.safe {
+  color: #2ecc71;
+}
+
+.warning {
+  color: #f39c12;
+}
+
+.danger {
+  color: #e74c3c;
+}
+
+/* Card border indicators */
+.card.safe {
+  border-left: 5px solid #2ecc71;
+}
+
+.card.warning {
+  border-left: 5px solid #f39c12;
+}
+
+.card.danger {
+  border-left: 5px solid #e74c3c;
+}

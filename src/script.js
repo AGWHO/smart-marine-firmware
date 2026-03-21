@@ -2,7 +2,6 @@
 const shoreCoords = [9.874979892536736, 123.60819114958444];
 
 // ===== SIMULATED BOAT PATH =====
-// Used for now while GPS is unavailable
 const boatPath = [
   [9.905, 123.64],
   [9.9, 123.635],
@@ -17,66 +16,79 @@ const boatPath = [
   [9.9, 123.639],
 ];
 
-// ===== CREATE MAP =====
-// Fixed view only, no auto zooming in and out
+// ===== MAP SETUP =====
 const map = L.map("map").setView([9.89, 123.62], 13);
 
-// ===== LOAD MAP TILES =====
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
 
-// ===== SHORE ICON =====
+// ===== SHORE MARKER =====
 const redIcon = new L.Icon({
   iconUrl:
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
 });
 
-// ===== SHORE MARKER =====
 L.marker(shoreCoords, { icon: redIcon })
   .addTo(map)
-  .bindPopup("<b>Shore Monitoring Station</b><br>Lawis Point - Orange Pi");
+  .bindPopup("<b>Shore Monitoring Station</b><br>Lawis Point");
 
 // ===== BOAT MARKER =====
 const boatMarker = L.marker(boatPath[0])
   .addTo(map)
-  .bindPopup("<b>Fishing Boat</b><br>Orange Pi Boat Unit");
+  .bindPopup("<b>Fishing Boat</b>");
 
-// ===== SAFE ZONE CIRCLE =====
+// ===== SAFE ZONE =====
 L.circle(shoreCoords, {
   color: "#2ecc71",
   fillColor: "#2ecc71",
   fillOpacity: 0.15,
   radius: 5000,
-})
-  .addTo(map)
-  .bindPopup("LoRa Communication Range (5km)");
+}).addTo(map);
 
-// ===== DISTANCE CALCULATOR =====
+// ===== DISTANCE FUNCTION =====
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) *
       Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+      Math.sin(dLon / 2) ** 2;
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-// ===== UPDATE BOAT INFO ON DASHBOARD =====
-function updateBoatInfo(coords, distanceKm) {
+// ===== NAVIGATION =====
+function goToBoatPage() {
+  window.location.href = "boat.html";
+}
+
+// ===== ALERT SYSTEM =====
+function triggerAlert(message) {
+  const banner = document.getElementById("alert-banner");
+  if (!banner) return;
+
+  banner.textContent = "⚠️ " + message;
+  banner.classList.remove("hidden");
+}
+
+// ===== CLEAR ALERT =====
+function clearAlert() {
+  const banner = document.getElementById("alert-banner");
+  if (!banner) return;
+
+  banner.classList.add("hidden");
+}
+
+// ===== UPDATE DASHBOARD INFO =====
+function updateBoatInfo(coords, distanceKm, data) {
   const [lat, lng] = coords;
 
   const boatLat = document.getElementById("boat-lat");
@@ -87,81 +99,94 @@ function updateBoatInfo(coords, distanceKm) {
   if (boatLat) boatLat.textContent = lat.toFixed(6);
   if (boatLng) boatLng.textContent = lng.toFixed(6);
 
+  // ===== STATUS LOGIC =====
   if (boatStatus) {
-    boatStatus.textContent =
-      distanceKm <= 5 ? "Active - Within Range" : "Warning - Out of Range";
+    if (data?.tilt_status === "Danger") {
+      boatStatus.textContent = "⚠️ Tilt Danger";
+      boatStatus.className = "danger";
+      triggerAlert("Boat tilt is dangerous!");
+    } else if (distanceKm > 5) {
+      boatStatus.textContent = "⚠️ Out of Range";
+      boatStatus.className = "warning";
+      triggerAlert("Boat out of safe range!");
+    } else {
+      boatStatus.textContent = "Active - Safe";
+      boatStatus.className = "safe";
+      clearAlert();
+    }
   }
 
+  // ===== ALERT COUNT =====
   if (alertsToday) {
-    alertsToday.textContent = distanceKm <= 5 ? "00" : "01";
+    let count = 0;
+    if (distanceKm > 5) count++;
+    if (data?.tilt_status === "Danger") count++;
+
+    alertsToday.textContent = count.toString().padStart(2, "0");
   }
 }
 
-// ===== LOAD STATUS FROM status.json =====
+// ===== LOAD SENSOR DATA =====
+let latestData = {};
+
 async function loadStatus() {
   try {
     const response = await fetch("status.json?t=" + Date.now());
     const data = await response.json();
+    latestData = data;
 
-    const weatherCondition = document.getElementById("weather-condition");
-    const systemStatus = document.getElementById("system-status");
+    const weather = document.getElementById("weather-condition");
+    const system = document.getElementById("system-status");
 
-    if (weatherCondition) {
-      weatherCondition.textContent =
-        data.rain === "DETECTED" ? "Rain Detected" : "Fair";
+    if (weather) {
+      weather.textContent = data.rain === "DETECTED" ? "Rain Detected" : "Fair";
     }
 
-    if (systemStatus) {
-      systemStatus.textContent = "System Online";
+    if (system) {
+      system.textContent = "🟢 Online";
     }
   } catch (error) {
-    console.error("Failed to load status.json:", error);
+    console.error("Status load failed:", error);
 
-    const systemStatus = document.getElementById("system-status");
-    if (systemStatus) {
-      systemStatus.textContent = "System Offline";
+    const system = document.getElementById("system-status");
+    if (system) {
+      system.textContent = "🔴 Offline";
     }
   }
 }
 
-// ===== OPEN BOAT DETAILS PAGE =====
-function goToBoatPage() {
-  window.location.href = "boat.html";
-}
-
-// ===== MOVE ONLY THE BOAT MARKER =====
+// ===== BOAT MOVEMENT =====
 let currentIndex = 0;
 
 function moveBoat() {
   currentIndex = (currentIndex + 1) % boatPath.length;
-  const newCoords = boatPath[currentIndex];
+  const coords = boatPath[currentIndex];
 
-  boatMarker.setLatLng(newCoords);
+  boatMarker.setLatLng(coords);
 
   const distanceKm = calculateDistance(
     shoreCoords[0],
     shoreCoords[1],
-    newCoords[0],
-    newCoords[1],
+    coords[0],
+    coords[1],
   );
 
   boatMarker.bindPopup(`
     <b>Fishing Boat</b><br>
-    Orange Pi Boat Unit<br>
-    Latitude: ${newCoords[0].toFixed(6)}<br>
-    Longitude: ${newCoords[1].toFixed(6)}<br>
-    Distance from Shore: ${distanceKm.toFixed(2)} km
+    Lat: ${coords[0].toFixed(6)}<br>
+    Lng: ${coords[1].toFixed(6)}<br>
+    Distance: ${distanceKm.toFixed(2)} km
   `);
 
-  updateBoatInfo(newCoords, distanceKm);
+  updateBoatInfo(coords, distanceKm, latestData);
 }
 
-// ===== RESIZE MAP ONLY =====
+// ===== FIX MAP RESIZE =====
 window.addEventListener("resize", () => {
   map.invalidateSize();
 });
 
-// ===== INITIAL LOAD =====
+// ===== INIT =====
 moveBoat();
 loadStatus();
 

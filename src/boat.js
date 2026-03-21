@@ -7,7 +7,6 @@ function goBackToDashboard() {
 const shoreCoords = [9.874979892536736, 123.60819114958444];
 
 // ===== SIMULATED BOAT PATH =====
-// Used for now while real GPS is unavailable
 const boatPath = [
   [9.905, 123.64],
   [9.9, 123.635],
@@ -22,25 +21,22 @@ const boatPath = [
   [9.9, 123.639],
 ];
 
-// ===== CREATE FIXED MAP =====
-// Fixed view only, no auto-fit and no auto-zoom
+// ===== CREATE MAP =====
 const boatMap = L.map("boat-map").setView([9.89, 123.62], 13);
 
-// ===== LOAD MAP TILES =====
+// ===== MAP TILES =====
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(boatMap);
 
-// ===== SHORE MARKER ICON =====
+// ===== SHORE ICON =====
 const redIcon = new L.Icon({
   iconUrl:
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
 });
 
 // ===== SHORE MARKER =====
@@ -51,7 +47,7 @@ L.marker(shoreCoords, { icon: redIcon })
 // ===== BOAT MARKER =====
 const boatMarker = L.marker(boatPath[0])
   .addTo(boatMap)
-  .bindPopup("<b>Fishing Boat</b><br>Orange Pi Boat Unit");
+  .bindPopup("<b>Fishing Boat</b>");
 
 // ===== SAFE ZONE =====
 L.circle(shoreCoords, {
@@ -59,38 +55,34 @@ L.circle(shoreCoords, {
   fillColor: "#2ecc71",
   fillOpacity: 0.15,
   radius: 5000,
-})
-  .addTo(boatMap)
-  .bindPopup("LoRa Communication Range (5km)");
+}).addTo(boatMap);
 
-// ===== DISTANCE CALCULATOR =====
+// ===== DISTANCE FUNCTION =====
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) *
       Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+      Math.sin(dLon / 2) ** 2;
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-// ===== STORE LATEST SENSOR DATA =====
-// These match the fields written by main.py
+// ===== SENSOR DATA =====
 let latestData = {
   rain: "UNKNOWN",
   obstacle: "UNKNOWN",
   distance_cm: null,
   wind_kmh: 0,
-  gps: "UNAVAILABLE",
+  tilt_angle: null,
+  tilt_status: "UNKNOWN",
 };
 
-// ===== LOAD SENSOR DATA FROM status.json =====
+// ===== LOAD DATA =====
 async function loadBoatStatus() {
   try {
     const response = await fetch("status.json?t=" + Date.now());
@@ -101,50 +93,67 @@ async function loadBoatStatus() {
   }
 }
 
-// ===== UPDATE BOAT DETAIL CARDS =====
+// ===== UPDATE UI =====
 function updateCards(distanceKm) {
   const wind = document.getElementById("detail-wind-status");
   const obstacle = document.getElementById("detail-obstacle-status");
   const distance = document.getElementById("detail-distance-status");
   const boatStatus = document.getElementById("detail-boat-status");
   const distanceToShore = document.getElementById("distance-to-shore");
-  const tilt = document.getElementById("detail-tilt-status");
 
-  // ===== WIND SENSOR =====
+  const tiltAngle = document.getElementById("detail-tilt-angle");
+  const tiltStatus = document.getElementById("detail-tilt-status");
+
+  // WIND
   if (wind) {
     wind.textContent =
-      latestData.wind_kmh !== null && latestData.wind_kmh !== undefined
-        ? `${latestData.wind_kmh} km/h`
-        : "No Data";
+      latestData.wind_kmh != null ? `${latestData.wind_kmh} km/h` : "No Data";
   }
 
-  // ===== OBSTACLE SENSOR =====
+  // OBSTACLE
   if (obstacle) {
     obstacle.textContent = latestData.obstacle || "UNKNOWN";
   }
 
-  // ===== DISTANCE SENSOR =====
+  // DISTANCE SENSOR
   if (distance) {
     distance.textContent =
-      latestData.distance_cm !== null && latestData.distance_cm !== undefined
+      latestData.distance_cm != null
         ? `${latestData.distance_cm} cm`
         : "No reading";
   }
 
-  // ===== DISTANCE TO SHORE =====
+  // DISTANCE TO SHORE
   if (distanceToShore) {
     distanceToShore.textContent = `${distanceKm.toFixed(2)} km`;
   }
 
-  // ===== TILT SENSOR =====
-  // Still placeholder because your main.py does not provide tilt yet
-  if (tilt) {
-    tilt.textContent = "No Data";
+  // ===== ✅ TILT ANGLE =====
+  if (tiltAngle) {
+    tiltAngle.textContent =
+      latestData.tilt_angle != null ? `${latestData.tilt_angle}°` : "--";
+  }
+
+  // ===== ✅ TILT STATUS + COLOR =====
+  if (tiltStatus) {
+    tiltStatus.textContent = latestData.tilt_status || "UNKNOWN";
+
+    if (latestData.tilt_status === "Flat") {
+      tiltStatus.style.color = "green";
+    } else if (latestData.tilt_status === "Slight") {
+      tiltStatus.style.color = "orange";
+    } else if (latestData.tilt_status === "Danger") {
+      tiltStatus.style.color = "red";
+    } else {
+      tiltStatus.style.color = "gray";
+    }
   }
 
   // ===== BOAT STATUS =====
   if (boatStatus) {
-    if (latestData.obstacle === "DETECTED") {
+    if (latestData.tilt_status === "Danger") {
+      boatStatus.textContent = "⚠️ Danger - Tilt Critical";
+    } else if (latestData.obstacle === "DETECTED") {
       boatStatus.textContent = "Warning - Obstacle";
     } else {
       boatStatus.textContent = "Active - Safe";
@@ -152,7 +161,7 @@ function updateCards(distanceKm) {
   }
 }
 
-// ===== MOVE ONLY THE BOAT MARKER =====
+// ===== BOAT MOVEMENT =====
 let currentIndex = 0;
 
 function moveBoat() {
@@ -170,20 +179,20 @@ function moveBoat() {
 
   boatMarker.bindPopup(`
     <b>Fishing Boat</b><br>
-    Latitude: ${coords[0].toFixed(6)}<br>
-    Longitude: ${coords[1].toFixed(6)}<br>
-    Distance from Shore: ${distanceKm.toFixed(2)} km
+    Lat: ${coords[0].toFixed(6)}<br>
+    Lng: ${coords[1].toFixed(6)}<br>
+    Distance: ${distanceKm.toFixed(2)} km
   `);
 
   updateCards(distanceKm);
 }
 
-// ===== FIX MAP RESIZE =====
+// ===== RESIZE FIX =====
 window.addEventListener("resize", () => {
   boatMap.invalidateSize();
 });
 
-// ===== INITIAL LOAD =====
+// ===== INIT =====
 loadBoatStatus();
 moveBoat();
 

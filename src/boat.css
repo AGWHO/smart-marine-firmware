@@ -1,49 +1,59 @@
-/* Back button (Boat page) */
-.back-button {
-  background: #0d3b66;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s ease;
+/* ===== FINAL BOAT PAGE LAYOUT FIX ===== */
+
+/* Center everything and prevent stretching */
+.main-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
 }
 
-.back-button:hover {
-  background: #145a9c;
+/* Header */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-/* Make boat page layout single column */
-.single-panel {
-  grid-template-columns: 1fr !important;
+/* FORCE GRID (fix broken stacked cards) */
+.cards-container {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  gap: 15px !important;
 }
 
-/* Improve spacing inside boat details */
-.single-panel .tracker-item {
-  margin-bottom: 12px;
+/* Card design */
+.card {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  width: 100%;
 }
 
-/* Highlight sensor values */
-#detail-rain-status,
-#detail-obstacle-status,
-#detail-distance-status,
-#detail-gps-status,
-#sensor-rain-status,
-#sensor-obstacle-status,
-#sensor-distance-status,
-#sensor-gps-status {
+/* Prevent weird stretching text */
+.card p {
+  margin-top: 6px;
+  font-size: 18px;
   font-weight: bold;
   color: #0d3b66;
+  white-space: nowrap;
 }
 
-/* Optional: status colors */
-.status-safe {
-  color: #2ecc71;
-  font-weight: bold;
+/* Map fix */
+.map-container {
+  width: 100%;
+  height: 500px;
+  margin-top: 10px;
 }
 
-.status-warning {
-  color: #e74c3c;
-  font-weight: bold;
+#boat-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+/* Optional: hide old layout system if still active */
+.cards {
+  display: none !important;
 }

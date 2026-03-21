@@ -1,16 +1,12 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- ===== BASIC PAGE SETUP ===== -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SeaSafe Dashboard</title>
 
-    <title>SeaSafe</title>
-
-    <!-- ===== MAIN CSS FILE ===== -->
     <link rel="stylesheet" href="style.css" />
 
-    <!-- ===== LEAFLET MAP CSS ===== -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -18,119 +14,62 @@
   </head>
 
   <body>
-    <div class="container">
-      <!-- ===== SIDEBAR START ===== -->
-      <aside class="sidebar">
-        <div class="logo">Smart <span>Marine</span><br />Monitoring</div>
-
-        <nav class="nav">
-          <a href="index.html" class="active">Dashboard</a>
-        </nav>
-
-        <div class="sidebar-box">
-          <strong>Project Goal:</strong><br />
-          Monitor boat location, improve safety, and support real-time marine
-          tracking.
-        </div>
-
-        <div class="sidebar-box">
-          <strong>Prototype Version:</strong><br />
-          v1.0 - GPS Monitoring UI
-        </div>
-      </aside>
-
-      <!-- ===== MAIN CONTENT START ===== -->
-      <main class="main">
-        <div class="topbar">
-          <h1>Marine GPS Tracking Dashboard</h1>
-          <div class="status-badge" id="system-status">System Online</div>
-        </div>
-
-        <!-- ===== TOP SUMMARY CARDS ===== -->
-        <section class="cards">
-          <div class="card">
-            <h3>Active Boats</h3>
-            <p>01</p>
-          </div>
-
-          <div class="card">
-            <h3>Connected Devices</h3>
-            <p>02</p>
-          </div>
-
-          <div class="card">
-            <h3>Alerts Today</h3>
-            <p id="alerts-today">00</p>
-          </div>
-
-          <div class="card">
-            <h3>Weather Condition</h3>
-            <p id="weather-condition">Fair</p>
-          </div>
-        </section>
-
-        <!-- ===== MAIN DASHBOARD GRID ===== -->
-        <section class="dashboard-grid">
-          <!-- ===== MAP PANEL ===== -->
-          <div class="panel">
-            <h2>Live GPS Map</h2>
-
-            <div id="map"></div>
-
-            <div class="legend">
-              <span><i class="dot safe"></i> Safe Zone</span>
-              <span><i class="dot warning"></i> Warning Area</span>
-              <span><i class="dot danger"></i> Critical Alert</span>
-            </div>
-          </div>
-
-          <!-- ===== DEVICE STATUS PANEL ===== -->
-          <div class="panel">
-            <h2>Device Status</h2>
-
-            <div class="tracker-list">
-              <!-- ===== SHORE CARD ===== -->
-              <div class="tracker-item">
-                <h3>Shore Station - Lawis Point</h3>
-                <p><strong>Status:</strong> Monitoring</p>
-                <p><strong>Latitude:</strong> 9.8827</p>
-                <p><strong>Longitude:</strong> 123.6076</p>
-                <p><strong>Device:</strong> Orange Pi Shore Unit</p>
-              </div>
-
-              <!-- ===== BOAT CARD ===== -->
-              <div class="tracker-item clickable-card" onclick="goToBoatPage()">
-                <h3>Fishing Boat</h3>
-
-                <p>
-                  <strong>Status:</strong>
-                  <span id="boat-status">Active</span>
-                </p>
-
-                <p>
-                  <strong>Latitude:</strong>
-                  <span id="boat-lat">9.905000</span>
-                </p>
-
-                <p>
-                  <strong>Longitude:</strong>
-                  <span id="boat-lng">123.640000</span>
-                </p>
-
-                <p><strong>Device:</strong> Orange Pi Boat Unit</p>
-
-                <p class="view-details">Tap to view boat details →</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+    <!-- ALERT BAR -->
+    <div id="alert-banner" class="alert-banner hidden">
+      ⚠️ System Warning Detected!
     </div>
 
-    <!-- ===== LEAFLET MAP JS ===== -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <div class="main-container">
+      <!-- HEADER -->
+      <div class="topbar">
+        <h1>Marine Monitoring Dashboard</h1>
+        <div id="system-status" class="status-badge">🟢 Online</div>
+      </div>
 
-    <!-- ===== MAIN SCRIPT ===== -->
+      <!-- SUMMARY CARDS -->
+      <div class="cards-container">
+        <div class="card">
+          <h3>Active Boats</h3>
+          <p>01</p>
+        </div>
+
+        <div class="card">
+          <h3>Connected Devices</h3>
+          <p>02</p>
+        </div>
+
+        <div class="card" id="card-alerts">
+          <h3>Alerts Today</h3>
+          <p id="alerts-today">0</p>
+        </div>
+
+        <div class="card">
+          <h3>Weather</h3>
+          <p id="weather-condition">Fair</p>
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div class="map-container">
+        <h2>Live GPS Tracking</h2>
+        <div id="map"></div>
+      </div>
+
+      <!-- BOAT QUICK INFO -->
+      <div class="cards-container">
+        <div class="card clickable-card" onclick="goToBoatPage()">
+          <h3>Fishing Boat</h3>
+
+          <p>Status: <span id="boat-status">Active</span></p>
+          <p>Lat: <span id="boat-lat">--</span></p>
+          <p>Lng: <span id="boat-lng">--</span></p>
+
+          <p class="view-details">View Details →</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
